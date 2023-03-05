@@ -16,6 +16,7 @@ The project was implemented using the following python modules
 * dash: Wrapper for plotly graph objects
 * plotly: Interactive graphs
 * pandas: Data management
+* flask: Webserver and web application management
 
 ### Data
 The underlying open dataset can be found here: https://data.deutschebahn.com/dataset/data-sensordaten-schenker-seefrachtcontainer.html
