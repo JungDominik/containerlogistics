@@ -21,6 +21,9 @@ The project was implemented using the following python modules
 ### Data
 The underlying open dataset can be found here: https://data.deutschebahn.com/dataset/data-sensordaten-schenker-seefrachtcontainer.html
 
+### Caveats
+Currently no handling of outliers / unrealistic data. Requires manual data cleaning by the user.
+
 ### Instructions
 Run from console with 
 
