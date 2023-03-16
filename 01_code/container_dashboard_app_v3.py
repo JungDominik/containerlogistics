@@ -24,6 +24,9 @@ df_initial['Datetime'] = pd.to_datetime(
     df_initial['Date'] + ' ' + df_initial['Time_UTC']
 )
 
+#Identify list of unique Containers for use in search (query)
+list_containers = df_initial['SXXJ number'].unique()
+
 
 ###Set up Dashboard 
 
@@ -43,6 +46,63 @@ app = Dash(__name__, external_stylesheets=external_stylesheets)
 #Layout
 app.layout = html.Div(
     children=[
+        
+        #This it the Container Selection menu. The selection correctly shows the available containers however selection does not yet impact the graph
+        #Pretty ayout still TODO
+        html.Div(
+            children = [
+                        html.Div(children="Container Selection", className="menu-title"),
+                        dcc.Dropdown(
+                            id="container-filter",
+                            options=[
+                                {"label": container, 
+                                "value": container}
+                                for container in list_containers
+                            ],
+                            value="A",
+                            clearable=False,
+                            className="dropdown",
+                        )
+            ]
+        ),
+        
+        html.Div(
+                    children=[
+                        html.Div(children="Type", className="menu-title"),
+                        dcc.Dropdown(
+                            id="type-filter",
+                            options=[
+                                {
+                                    "label": container.title(),
+                                    "value": container,
+                                }
+                                for container in list_containers
+                            ],
+                            value="organic",
+                            clearable=False,
+                            searchable=False,
+                            className="dropdown",
+                        ),
+                    ],
+                ),
+        
+        html.Div(
+            children =[
+                html.Div(
+                    children = "Date Range", className ="menu-title"
+                ),
+                dcc.DatePickerRange(
+                    id = "date-range",
+                    min_date_allowed=df_initial["Date"].min(),
+                    max_date_allowed=df_initial["Date"].max(),
+                    start_date=df_initial["Date"].min(),
+                    end_date=df_initial["Date"].max()
+                )
+            ],
+            className = "menu"
+        ),
+        
+        
         html.Div(
             children = [
                 html.P(children="🚢📦", className="header-emoji"),
@@ -72,6 +132,7 @@ app.layout = html.Div(
                                 {
                                     "x": df_initial['Datetime'],
                                     "y": df_initial['Temperature'],
+                                    #"y": df_initial.loc[df_initial['SXXJ number'] == 'C', 'Temperature'],  ### Possible implementation of filtering for Container (identified in column SXXJ Number)
                                     "type": "lines",
                                     "hovertemplate": (
                                         "%{y:.2f}°C<extra></extra>"
