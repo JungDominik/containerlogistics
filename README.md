@@ -1,6 +1,8 @@
 # Container Logistics Dashboard (WIP)
-Data visualisation dashboard in the context of containerlogistics. Open dataset of automatically generated measurements by a large carrier.
-![image](https://user-images.githubusercontent.com/29613804/222990359-61546f7f-60bf-4740-8570-82cce9c1a39d.png)
+Data visualisation dashboard in the context of containerlogistics. Open dataset of automatically generated measurements by a large sea container carrier.
+![image](https://user-images.githubusercontent.com/29613804/226214291-72e9ed62-1df1-4efb-a1be-42de43d0f179.png)
+
+
 
 
 ### Description
