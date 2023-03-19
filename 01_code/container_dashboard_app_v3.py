@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from dash import Dash, dcc, html
+from dash.dependencies import Input, Output
 
 
 
@@ -18,6 +19,9 @@ df_initial = df_initial.dropna(subset=['Temperature']) #Remove rows with missing
 df_initial = df_initial.dropna(subset=['Humidity']) #Remove rows with missing Humidity values
 df_initial['Temperature'] = df_initial['Temperature'].astype('float')
 df_initial['Humidity'] = df_initial['Humidity'].astype('float')
+df_initial = df_initial.rename(columns={"SXXJ number": "container_id"})
+
+
 
 #Manage Datetimes
 df_initial['Datetime'] = pd.to_datetime(
@@ -25,7 +29,7 @@ df_initial['Datetime'] = pd.to_datetime(
 )
 
 #Identify list of unique Containers for use in search (query)
-list_containers = df_initial['SXXJ number'].unique()
+list_containers = df_initial['container_id'].unique()
 
 
 ###Set up Dashboard 
@@ -45,8 +49,9 @@ app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 #Layout
 app.layout = html.Div(
+    
     children=[
-        
+  
         #This it the Container Selection menu. The selection correctly shows the available containers however selection does not yet impact the graph
         #Pretty ayout still TODO
         html.Div(
@@ -59,8 +64,8 @@ app.layout = html.Div(
                                 "value": container}
                                 for container in list_containers
                             ],
-                            value="A",
-                            clearable=False,
+                            value='A',
+                            clearable= False,
                             className="dropdown",
                         )
             ]
@@ -125,7 +130,7 @@ app.layout = html.Div(
             children=[
                 html.Div(
                     children=dcc.Graph(
-                        id="price-chart",
+                        id="temperature-chart",
                         config={"displayModeBar": False},
                         figure={
                             "data": [
@@ -186,42 +191,52 @@ app.layout = html.Div(
         ),
     ]
 )
-    
-#         dcc.Graph(
-#             figure={
-#                 "data": [
-#                     {
-#                         "x": df_initial['Datetime'],
-#                         "y": df_initial['Temperature'],
-#                         "type": "lines",
-#                     },
-#                 ],
-#                 "layout": {"title": "Container Temperature"},
-#             },
-#         ),
-#         dcc.Graph(
-#             figure={
-#                 "data": [
-#                     {
-#                         "x": df_initial['Datetime'],
-#                         "y": df_initial['Humidity'],
-#                         "type": "lines",
-#                     },
-#                 ],
-#                 "layout": {"title": "Container Humidity"},
-#             },
-#         ),
-#     ]
-# )
+   
+### Callback function to make map interactive
 
-# Update Map Graph based on date-picker, selected data on histogram and location dropdown
-#@app.callback
-#pass
+@app.callback(
+    #Likely structure: Outputs, Inputs, one func that for all interactive elements takes input, calculates variables, returns vars to be forwarded to Output
+    Output(component_id="temperature-chart", component_property = "figure"),
+    Input(component_id = "container-filter", component_property = "value")
+    )    
+def linkfunction_graphupdate(selection_container): 
+    #Making the app react to user interaction. Inputs: Dashboard selection variables. Output: "figure"-jsons to update the graphs "figure" variables
+    #Same code as the initial graph, only dataselection based on the filtervalues
 
-#Making the app react to user interaction
-def update_graph(datePicked, selectedData, selectedLocation):
-    pass
+    #data_filtered = df_initial.query('container_id == @selection_container')
+    data_filtered = df_initial[df_initial.container_id == selection_container]
+    #print (selection_container)
+    #returnvar_fig_temperature = pass
+    #returnvar_fig_humidity = pass
+
+    figure_chart_temperature = {
+                            "data": [
+                                {
+                                    "x": data_filtered['Datetime'],
+                                    "y": data_filtered['Temperature'],
+                                    #"y": df_initial.loc[df_initial['SXXJ number'] == 'C', 'Temperature'],  ### Possible implementation of filtering for Container (identified in column SXXJ Number)
+                                    "type": "lines",
+                                    "hovertemplate": (
+                                        "%{y:.2f}°C<extra></extra>"
+                                    ),
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "Container Temperature",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": True},
+                                "yaxis": {
+                                    "fixedrange": True,
+                                },
+                                "colorway": ["#17b897"],
+                            },
+                        }
+    return figure_chart_temperature
 
 # Run the app
 if __name__ == "__main__":
    app.run_server(debug=True)
+
