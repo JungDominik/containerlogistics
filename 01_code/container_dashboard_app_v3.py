@@ -162,7 +162,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     children=dcc.Graph(
-                        id="volume-chart",
+                        id="humidity-chart",
                         config={"displayModeBar": False},
                         figure={
                             "data": [
@@ -197,18 +197,22 @@ app.layout = html.Div(
 @app.callback(
     #Likely structure: Outputs, Inputs, one func that for all interactive elements takes input, calculates variables, returns vars to be forwarded to Output
     Output(component_id="temperature-chart", component_property = "figure"),
-    Input(component_id = "container-filter", component_property = "value")
+    Output(component_id="humidity-chart", component_property = "figure"),
+    Input(component_id = "container-filter", component_property = "value"),
+    Input(component_id = "date-range", component_property = "start_date"),
+    Input(component_id = "date-range", component_property = "end_date")
     )    
-def linkfunction_graphupdate(selection_container): 
+def linkfunction_graphupdate(selection_container, start_date, end_date): 
     #Making the app react to user interaction. Inputs: Dashboard selection variables. Output: "figure"-jsons to update the graphs "figure" variables
     #Same code as the initial graph, only dataselection based on the filtervalues
 
-    #data_filtered = df_initial.query('container_id == @selection_container')
-    data_filtered = df_initial[df_initial.container_id == selection_container]
-    #print (selection_container)
-    #returnvar_fig_temperature = pass
-    #returnvar_fig_humidity = pass
-
+    data_filtered = df_initial[
+        (df_initial.Date >= start_date) &
+        (df_initial.Date <= end_date)]
+    
+    data_filtered = data_filtered[
+        (data_filtered.container_id == selection_container)]
+    
     figure_chart_temperature = {
                             "data": [
                                 {
@@ -234,9 +238,32 @@ def linkfunction_graphupdate(selection_container):
                                 "colorway": ["#17b897"],
                             },
                         }
-    return figure_chart_temperature
 
-# Run the app
+    figure_chart_humidity = {
+                            "data": [
+                                {
+                                    "x": data_filtered['Datetime'],
+                                    "y": data_filtered['Humidity'],
+                                    "type": "lines",
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "Container Humidity",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": True},
+                                "yaxis": {"fixedrange": True},
+                                "colorway": ["#3399ff"],
+                            },
+                        }
+
+
+
+
+    return figure_chart_temperature, figure_chart_humidity
+
 if __name__ == "__main__":
    app.run_server(debug=True)
 
